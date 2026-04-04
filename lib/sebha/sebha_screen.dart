@@ -1,21 +1,15 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
 
-class SplashScreen extends StatefulWidget {
-  const SplashScreen({super.key});
+class SebhaScreen extends StatefulWidget {
+  const SebhaScreen({super.key});
 
   @override
-  State<SplashScreen> createState() => _SplashScreenState();
+  State<SebhaScreen> createState() => _SebhaScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen> {
-
-
+class _SebhaScreenState extends State<SebhaScreen> {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-
-    );
-
+    return Scaffold();
   }
 }
