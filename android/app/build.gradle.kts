@@ -7,8 +7,9 @@ plugins {
 
 android {
     namespace = "com.example.islami"
-    compileSdk = flutter.compileSdkVersion
+    compileSdk = 34
     ndkVersion = flutter.ndkVersion
+    
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
@@ -24,8 +25,8 @@ android {
         applicationId = "com.example.islami"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
-        minSdk = flutter.minSdkVersion
-        targetSdk = flutter.targetSdkVersion
+        minSdk = 21
+        targetSdk = 34
         versionCode = flutter.versionCode
         versionName = flutter.versionName
     }
