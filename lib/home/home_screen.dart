@@ -51,22 +51,22 @@ class _HomeScreenState extends State<HomeScreen> {
           BottomNavigationBarItem(
             icon: Icon(Icons.home),
             label: 'Home',
-            backgroundColor: Color(0xFF202020).withOpacity(0.6),
+            backgroundColor: AppColors.selectedBackground,
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.book),
             label: 'Quran',
-            backgroundColor: Color(0xFF202020).withOpacity(0.6),
+            backgroundColor: AppColors.selectedBackground,
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.accessibility),
             label: 'Sebha',
-            backgroundColor: Color(0xFF202020).withOpacity(0.6),
+            backgroundColor: AppColors.selectedBackground,
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.radio),
             label: 'Radio',
-            backgroundColor: Color(0xFF202020).withOpacity(0.6),
+            backgroundColor: AppColors.selectedBackground,
           ),
         ],
         currentIndex: _selectedIndex,
