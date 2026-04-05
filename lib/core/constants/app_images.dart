@@ -6,4 +6,5 @@ class AppImages {
   static const String quran = "assets/images/Quran.png";
   static const String bearish = "assets/images/Bearish.png";
   static const String radio = "assets/images/Radio.png";
+  static const String background = "assets/images/Background.png";
 }

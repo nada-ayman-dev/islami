@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import '../core/constants/app_colors.dart';
-import '../sebha/sebha_screen.dart';
-
+import '../core/widgets/app_navigation.dart';
+import 'package:islami/core/constants/app_images.dart';
+import 'package:islami/core/widgets/app_header.dart';
+import '../quran/quran_view.dart';
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -12,26 +14,9 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
 
-  static const List<Widget> _widgetOptions = <Widget>[
-    Center(
-      child: Text(
-        "Home Screen",
-        style: TextStyle(color: AppColors.textPrimary),
-      ),
-    ),
-    Center(
-      child: Text(
-        "Quran Screen",
-        style: TextStyle(color: AppColors.textPrimary),
-      ),
-    ),
-    SebhaScreen(),
-    Center(
-      child: Text(
-        "Radio Screen",
-        style: TextStyle(color: AppColors.textPrimary),
-      ),
-    ),
+  static List<Widget> _screens = [
+    QuranView(),
+
   ];
 
   void _onItemTapped(int index) {
@@ -42,38 +27,26 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      body: _widgetOptions.elementAt(_selectedIndex),
-      bottomNavigationBar: BottomNavigationBar(
-        type: BottomNavigationBarType.shifting,
-        items: <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Home',
-            backgroundColor: AppColors.selectedBackground,
+     return Scaffold(
+      body: Container(
+        decoration: BoxDecoration(
+          image: DecorationImage(
+            image: AssetImage(AppImages.background),
+            fit: BoxFit.cover,
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.book),
-            label: 'Quran',
-            backgroundColor: AppColors.selectedBackground,
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.accessibility),
-            label: 'Sebha',
-            backgroundColor: AppColors.selectedBackground,
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.radio),
-            label: 'Radio',
-            backgroundColor: AppColors.selectedBackground,
-          ),
-        ],
-        currentIndex: _selectedIndex,
-        selectedItemColor: Colors.white,
-        unselectedItemColor: Colors.black,
-        backgroundColor: AppColors.textPrimary,
-        onTap: _onItemTapped,
+        ),
+        child: Column(
+          children: [
+            const AppHeader(),
+            Expanded(
+              child: _screens[_selectedIndex],
+            ),
+          ],
+        ),
+      ),
+      bottomNavigationBar: AppNavigationBar(
+        selectedIndex: _selectedIndex,
+        onItemTapped: _onItemTapped,
       ),
     );
   }

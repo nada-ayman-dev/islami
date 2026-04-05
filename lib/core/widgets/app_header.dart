@@ -7,7 +7,7 @@ class AppHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(top: 16, left: 69.5),
+      padding: const EdgeInsets.only(top: 16, left: 20),
       child: Column(
         children: [
           Image.asset(AppImages.headerLogo, height: 151, width: 291),
