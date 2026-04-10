@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:islami/core/constants/app_colors.dart';
 import 'package:islami/core/constants/app_images.dart';
+import 'hadeth_details.dart';
 
 Future<String> loadHadethFile(String hadethNumber) async {
   try {
@@ -20,70 +20,92 @@ class HadethView extends StatefulWidget {
 }
 
 class _HadethListViewState extends State<HadethView> {
+  final PageController controller = PageController(viewportFraction: 0.75);
+
+  double currentPage = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    controller.addListener(() {
+      setState(() {
+        currentPage = controller.page ?? 0;
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
-    return ListView.builder(
-      padding: const EdgeInsets.symmetric(vertical: 16),
+    return PageView.builder(
+      controller: controller,
       itemCount: 50,
       itemBuilder: (context, index) {
-        int hadethNumber = index + 1;
-        return HadethCard(hadethNumber: hadethNumber.toString());
+        double scale = (1 - (currentPage - index).abs()).clamp(0.85, 1.0);
+
+        return Transform.scale(
+          scale: scale,
+          child: HadethCard(hadethNumber: (index + 1).toString()),
+        );
       },
     );
   }
 }
 
-// 👇 كارت الحديث الفردي
+// 👇 كارت الحديث
 class HadethCard extends StatelessWidget {
   final String hadethNumber;
 
   const HadethCard({super.key, required this.hadethNumber});
+
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Stack(
-        clipBehavior: Clip.none,
-        children: [
-          // 👇 البوردر والخلفية
-          Container(
-            width: double.infinity,
-            decoration: BoxDecoration(
-              color: AppColors.background,
-              border: Border.all(color: AppColors.textPrimary, width: 2),
-              borderRadius: BorderRadius.circular(20),
-            ),
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => HadethDetails(hadethNumber: hadethNumber),
+          ),
+        );
+      },
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 20),
+        child: Container(
+          decoration: BoxDecoration(
+            color: AppColors.textPrimary,
+            border: Border.all(color: AppColors.textPrimary, width: 3),
+            borderRadius: BorderRadius.circular(20),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.3),
+                blurRadius: 10,
+                offset: const Offset(0, 5),
+              ),
+            ],
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(20),
             child: Stack(
               children: [
-                // الصورة مع Overlay أسود
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(20),
-                  child: ColorFiltered(
-                    colorFilter: ColorFilter.mode(
-                      AppColors.textPrimary.withOpacity(0.40),
-                      BlendMode.colorBurn,
-                    ),
-                    child: Image.asset(
-                      AppImages.quran,
-                      width: double.infinity,
-                      height: 350,
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                ),
-
-                // 👈 الصورة على اليسار
+                // 👈 الزوايا اليسار
                 Positioned(
                   top: 16,
                   left: 16,
-                  child: SvgPicture.asset(
+                  child: Image.asset(
                     AppImages.imgleftcorner,
                     width: 80,
                     height: 80,
+                    color: Colors.black,
                   ),
                 ),
 
-                // 👉 الصورة على اليمين
+                // 👉 الزوايا اليمين
                 Positioned(
                   top: 16,
                   right: 16,
@@ -91,23 +113,23 @@ class HadethCard extends StatelessWidget {
                     AppImages.imgrightcorner,
                     width: 80,
                     height: 80,
+                    color: Colors.black,
                   ),
                 ),
 
-                // النص المحمل من الملف
+                // 👇 النص
                 Positioned(
                   top: 100,
                   left: 0,
                   right: 0,
-                  bottom: 100,
+                  bottom: 120,
                   child: FutureBuilder<String>(
                     future: loadHadethFile(hadethNumber),
                     builder: (context, snapshot) {
                       if (snapshot.connectionState != ConnectionState.done) {
-                        return const Center(
-                          child: CircularProgressIndicator(),
-                        );
+                        return const Center(child: CircularProgressIndicator());
                       }
+
                       if (snapshot.hasError ||
                           snapshot.data == null ||
                           snapshot.data!.isEmpty) {
@@ -118,18 +140,21 @@ class HadethCard extends StatelessWidget {
                           ),
                         );
                       }
+
                       return SingleChildScrollView(
                         child: Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 16),
                           child: Text(
                             snapshot.data!,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 14,
-                              height: 1.6,
-                            ),
                             textAlign: TextAlign.center,
-                            textDirection: TextDirection.rtl,
+                            style: const TextStyle(
+                              color: Colors.black,
+                              fontFamily: 'Janna LT',
+                              fontWeight: FontWeight.w700,
+                              fontSize: 16,
+                              height: 1.0, // 👈 line-height 100%
+                              letterSpacing: 0,
+                            ),
                           ),
                         ),
                       );
@@ -137,31 +162,22 @@ class HadethCard extends StatelessWidget {
                   ),
                 ),
 
-                // 👇 الصورة في الزاوية السفلى اليسار
+                // 👇 الزخرفة السفلية
                 Positioned(
-                  bottom: 16,
-                  left: 16,
-                  child: SvgPicture.asset(
-                    AppImages.imgleftcorner,
-                    width: 80,
-                    height: 80,
-                  ),
-                ),
-
-                // 👇 الصورة في الزاوية السفلى اليمين
-                Positioned(
-                  bottom: 16,
-                  right: 16,
-                  child: SvgPicture.asset(
-                    AppImages.imgrightcorner,
-                    width: 80,
-                    height: 80,
+                  bottom: 0,
+                  left: 0,
+                  right: 0,
+                  child: Image.asset(
+                    AppImages.imgbottomdecoration,
+                    height: 112,
+                    fit: BoxFit.cover,
+                    color: Colors.black,
                   ),
                 ),
               ],
             ),
           ),
-        ],
+        ),
       ),
     );
   }

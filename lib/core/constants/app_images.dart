@@ -13,4 +13,11 @@ class AppImages {
   static const String imgleftcorner = "assets/images/imgleftcorner.png";
   static const String imgrightcorner = "assets/images/imgrightcorner.png";
 
+
+  static const String SebhaHead = "assets/images/SebhaHead.png";
+  static const String SebhaBody = "assets/images/SebhaBody.png";
+  static const String sebhabackg = "assets/images/sebhabackg.jpg";
+
+
+
 }

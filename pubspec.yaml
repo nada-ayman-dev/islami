@@ -62,7 +62,6 @@ flutter:
     - family: Janna LT
       fonts:
         - asset: fonts/JannaLT-Regular.ttf
-        - asset: fonts/JannaLT-Bold.ttf
           weight: 700
 
   # To add assets to your application, add an assets section, like this:
@@ -102,3 +101,5 @@ flutter:
     - assets/icons/
     - assets/files/
     - assets/Suras/
+
+    - assets/Hadeeth/
