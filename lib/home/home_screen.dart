@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
-import '../core/constants/app_colors.dart';
+import 'package:islami/hadeth/hadeth_view.dart';
+import 'package:islami/quran/quran_view.dart';
 import '../core/widgets/app_navigation.dart';
 import 'package:islami/core/constants/app_images.dart';
 import 'package:islami/core/widgets/app_header.dart';
-import '../quran/quran_view.dart';
+
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -14,10 +15,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
 
-  static List<Widget> _screens = [
-    QuranView(),
-
-  ];
+  static List<Widget> _screens = [QuranView(), HadethView()];
 
   void _onItemTapped(int index) {
     setState(() {
@@ -27,21 +25,22 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-     return Scaffold(
-      body: Container(
-        decoration: BoxDecoration(
-          image: DecorationImage(
-            image: AssetImage(AppImages.background),
-            fit: BoxFit.cover,
-          ),
-        ),
-        child: Column(
-          children: [
-            const AppHeader(),
-            Expanded(
-              child: _screens[_selectedIndex],
+    return Scaffold(
+      body: SafeArea(
+        bottom: false,
+        child: Container(
+          decoration: BoxDecoration(
+            image: DecorationImage(
+              image: AssetImage(AppImages.background),
+              fit: BoxFit.cover,
             ),
-          ],
+          ),
+          child: Column(
+            children: [
+              const AppHeader(),
+              Expanded(child: _screens[_selectedIndex]),
+            ],
+          ),
         ),
       ),
       bottomNavigationBar: AppNavigationBar(

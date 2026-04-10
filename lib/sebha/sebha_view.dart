@@ -10,8 +10,6 @@ class SebhaView extends StatefulWidget {
 class _SebhaViewState extends State<SebhaView> {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-
-    );
+    return Scaffold(body: SafeArea(child: Container()));
   }
 }

@@ -4,4 +4,8 @@ class AppIcons {
   static const String sebha = 'assets/icons/bar6.svg';
   static const String radio = 'assets/icons/bar4.svg';
   static const String time = 'assets/icons/bar5.svg';
+
+  static const String sura_number = 'assets/icons/sura_number.svg';
+
+
 }
