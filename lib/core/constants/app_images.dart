@@ -17,6 +17,8 @@ class AppImages {
   static const String SebhaHead = "assets/images/SebhaHead.png";
   static const String SebhaBody = "assets/images/SebhaBody.png";
   static const String sebhabackg = "assets/images/sebhabackg.jpg";
+  static const String hadethbackground = "assets/images/hadethbackground.jpg";
+  static const String radioimg = "assets/images/radio.jpg";
 
 
 

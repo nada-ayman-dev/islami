@@ -32,7 +32,7 @@ class SuraLoader {
     );
 
     List<String> parseList(String input) {
-      final regex = RegExp('"([^\"]*?)"|\'([^\']*?)\'');
+      final regex = RegExp('"([^"]*?)"|\'([^\']*?)\'');
       return regex
           .allMatches(input)
           .map((m) => (m.group(1) ?? m.group(2) ?? '').trim())

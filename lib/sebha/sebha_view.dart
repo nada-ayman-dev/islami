@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:islami/core/constants/app_images.dart';
+import 'package:islami/core/widgets/app_header.dart';
 
 class SebhaView extends StatefulWidget {
   const SebhaView({super.key});
@@ -45,127 +46,95 @@ class _SebhaViewState extends State<SebhaView> {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Container(
-        width: double.infinity,
-        height: double.infinity,
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
-        decoration: BoxDecoration(
-          image: DecorationImage(
-            image: AssetImage(AppImages.sebhabackg),
-            fit: BoxFit.cover,
-            colorFilter: ColorFilter.mode(
-              const Color.fromRGBO(0, 0, 0, 0.45),
-              BlendMode.darken,
-            ),
+    return Stack(
+      children: [
+        Positioned.fill(
+          child: Image.asset(AppImages.sebhabackg, fit: BoxFit.cover,
+            filterQuality: FilterQuality.low,
           ),
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            const SizedBox(height: 30),
-            Text(
-              'Islami',
-              style: TextStyle(
-                fontFamily: 'Janna LT',
-                fontSize: 40,
-                fontWeight: FontWeight.bold,
-                color: const Color.fromRGBO(255, 255, 255, 0.95),
-                shadows: [
-                  const Shadow(
-                    color: Color.fromRGBO(0, 0, 0, 0.35),
-                    offset: Offset(0, 3),
-                    blurRadius: 10,
-                  ),
+        Positioned.fill(
+          child: Container(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  Color.fromRGBO(32, 32, 32, 0.7), // فوق خفيف
+                  Color(0xFF202020), // تحت غامق
                 ],
               ),
             ),
-            const SizedBox(height: 14),
-            const Text(
-              'سبِّح اسمَ رَبِّكَ الأَعْلَى',
-              style: TextStyle(
-                fontFamily: 'Janna LT',
-                fontSize: 18,
-                color: Colors.white,
-                fontWeight: FontWeight.w600,
-                height: 1.4,
+          ),
+        ),
+
+        /// 👇 المحتوى
+        SafeArea(
+          child: Column(
+            children: [
+              const AppHeader(), // 👈 ضيفي الهيدر هنا
+              const SizedBox(height: 10),
+
+              const Text(
+                'سبِّح اسمَ رَبِّكَ الأَعْلَى',
+                style: TextStyle(
+                  fontFamily: 'Janna LT',
+                  fontSize: 36, // 👈 بدل 18
+                  color: Colors.white,
+                  fontWeight: FontWeight.w700, // 👈 Bold
+                  height: 1.0, // 👈 line-height 100%
+                ),
               ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 40),
-            Expanded(
-              child: Center(
-                child: GestureDetector(
-                  onTap: increment,
-                  child: SizedBox(
-                    width: 320,
-                    height: 340,
-                    child: Stack(
-                      clipBehavior: Clip.none,
-                      alignment: Alignment.center,
-                      children: [
-                        Image.asset(AppImages.SebhaBody, width: 320),
-                        Positioned(
-                          top: -10,
-                          child: Image.asset(AppImages.SebhaHead, width: 120),
-                        ),
-                        Positioned(
-                          top: 28,
-                          child: Container(
-                            width: 64,
-                            height: 64,
-                            decoration: BoxDecoration(
-                              color: const Color.fromRGBO(255, 255, 255, 0.15),
-                              shape: BoxShape.circle,
-                              border: Border.all(
-                                color: const Color.fromRGBO(
-                                  255,
-                                  255,
-                                  255,
-                                  0.35,
-                                ),
-                                width: 1.5,
-                              ),
-                            ),
-                            child: const Icon(
-                              Icons.touch_app,
-                              color: Colors.white,
-                              size: 32,
-                            ),
+
+              const SizedBox(height: 40),
+
+              /// 👇 السبحة
+              Expanded(
+                child: Center(
+                  child: GestureDetector(
+                    onTap: increment,
+                    child: SizedBox(
+
+
+                      child: Stack(
+                        alignment: Alignment.center,
+
+                        children: [
+                          /// 👇 جسم السبحة
+                          Image.asset(
+                            AppImages.SebhaBody,
+                            width: 340,
+                            height: 381,
+                            fit: BoxFit.contain,
                           ),
-                        ),
-                        Positioned(
-                          top: 140,
-                          child: Column(
-                            children: [
-                              Text(
-                                currentZekr,
-                                style: const TextStyle(
-                                  fontFamily: 'Janna LT',
-                                  fontSize: 24,
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
-                              const SizedBox(height: 12),
-                              Container(
-                                width: 120,
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 12,
-                                  horizontal: 0,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: const Color.fromRGBO(
-                                    255,
-                                    255,
-                                    255,
-                                    0.12,
+
+                          /// 👇 رأس السبحة
+                          Positioned(
+                            top: 0,
+                            child: Image.asset(AppImages.SebhaHead, width: 100),
+                          ),
+
+                          /// 👇 الذكر + العدد (في النص)
+                          Align(
+                            alignment: const Alignment(
+                              0,
+                              0.3,
+                            ), // 👈 مكان مظبوط بدل top:140
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  currentZekr,
+                                  style: const TextStyle(
+                                    fontFamily: 'Janna LT',
+                                    fontSize: 24,
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w700,
                                   ),
-                                  borderRadius: BorderRadius.circular(24),
                                 ),
-                                child: Text(
+                                const SizedBox(height: 12),
+                                Text(
                                   '$count',
-                                  textAlign: TextAlign.center,
                                   style: const TextStyle(
                                     fontFamily: 'Janna LT',
                                     fontSize: 40,
@@ -173,46 +142,22 @@ class _SebhaViewState extends State<SebhaView> {
                                     color: Colors.white,
                                   ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
                 ),
-              ),
-            ),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: reset,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color.fromRGBO(255, 255, 255, 0.18),
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 34,
-                  vertical: 14,
-                ),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(22),
-                  side: const BorderSide(
-                    color: Color.fromRGBO(255, 255, 255, 0.25),
-                  ),
-                ),
-              ),
-              child: const Text(
-                'إعادة الضبط',
-                style: TextStyle(
-                  fontFamily: 'Janna LT',
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-            const SizedBox(height: 24),
-          ],
+              ),  
+
+              //const SizedBox(height: 40),
+             // const SizedBox(height: 24),
+            ],
+          ),
         ),
-      ),
+      ],
     );
   }
 }

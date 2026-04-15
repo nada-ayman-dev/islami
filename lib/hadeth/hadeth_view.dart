@@ -3,6 +3,7 @@ import 'package:flutter/services.dart' show rootBundle;
 import 'package:islami/core/constants/app_colors.dart';
 import 'package:islami/core/constants/app_images.dart';
 import 'hadeth_details.dart';
+import 'package:islami/core/widgets/app_header.dart';
 
 Future<String> loadHadethFile(String hadethNumber) async {
   try {
@@ -21,7 +22,6 @@ class HadethView extends StatefulWidget {
 
 class _HadethListViewState extends State<HadethView> {
   final PageController controller = PageController(viewportFraction: 0.75);
-
   double currentPage = 0;
 
   @override
@@ -42,22 +42,60 @@ class _HadethListViewState extends State<HadethView> {
 
   @override
   Widget build(BuildContext context) {
-    return PageView.builder(
-      controller: controller,
-      itemCount: 50,
-      itemBuilder: (context, index) {
-        double scale = (1 - (currentPage - index).abs()).clamp(0.85, 1.0);
+    return Stack(
+      children: [
+        /// 👇 الخلفية
+        Positioned.fill(
+          child: Image.asset(AppImages.hadethbackground, fit: BoxFit.cover),
+        ),
 
-        return Transform.scale(
-          scale: scale,
-          child: HadethCard(hadethNumber: (index + 1).toString()),
-        );
-      },
+        /// 👇 gradient
+        Positioned.fill(
+          child: Container(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [Color.fromRGBO(32, 32, 32, 0.7), Color(0xFF202020)],
+              ),
+            ),
+          ),
+        ),
+
+        /// 👇 المحتوى كله
+        SafeArea(
+          child: Column(
+            children: [
+              const AppHeader(),
+              const SizedBox(height: 10),
+
+              /// 👇 الكروت
+              Expanded(
+                child: PageView.builder(
+                  controller: controller,
+                  itemCount: 50,
+                  itemBuilder: (context, index) {
+                    double scale = (1 - (currentPage - index).abs()).clamp(
+                      0.85,
+                      1.0,
+                    );
+
+                    return Transform.scale(
+                      scale: scale,
+                      child: HadethCard(hadethNumber: (index + 1).toString()),
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }
 
-// 👇 كارت الحديث
+/// 👇 كارت الحديث
 class HadethCard extends StatelessWidget {
   final String hadethNumber;
 
@@ -74,12 +112,13 @@ class HadethCard extends StatelessWidget {
           ),
         );
       },
+
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 20),
+
         child: Container(
           decoration: BoxDecoration(
             color: AppColors.textPrimary,
-            border: Border.all(color: AppColors.textPrimary, width: 3),
             borderRadius: BorderRadius.circular(20),
             boxShadow: [
               BoxShadow(
@@ -89,11 +128,12 @@ class HadethCard extends StatelessWidget {
               ),
             ],
           ),
+
           child: ClipRRect(
             borderRadius: BorderRadius.circular(20),
             child: Stack(
               children: [
-                // 👈 الزوايا اليسار
+                /// 👈 الزوايا
                 Positioned(
                   top: 16,
                   left: 16,
@@ -105,7 +145,6 @@ class HadethCard extends StatelessWidget {
                   ),
                 ),
 
-                // 👉 الزوايا اليمين
                 Positioned(
                   top: 16,
                   right: 16,
@@ -117,7 +156,7 @@ class HadethCard extends StatelessWidget {
                   ),
                 ),
 
-                // 👇 النص
+                /// 👇 النص
                 Positioned(
                   top: 100,
                   left: 0,
@@ -142,6 +181,7 @@ class HadethCard extends StatelessWidget {
                       }
 
                       return SingleChildScrollView(
+                        physics: const BouncingScrollPhysics(),
                         child: Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 16),
                           child: Text(
@@ -152,8 +192,7 @@ class HadethCard extends StatelessWidget {
                               fontFamily: 'Janna LT',
                               fontWeight: FontWeight.w700,
                               fontSize: 16,
-                              height: 1.0, // 👈 line-height 100%
-                              letterSpacing: 0,
+                              height: 1.2,
                             ),
                           ),
                         ),
@@ -162,7 +201,7 @@ class HadethCard extends StatelessWidget {
                   ),
                 ),
 
-                // 👇 الزخرفة السفلية
+                /// 👇 الزخرفة تحت
                 Positioned(
                   bottom: 0,
                   left: 0,

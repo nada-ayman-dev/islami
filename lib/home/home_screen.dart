@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:islami/Radio/radio_view.dart';
 import 'package:islami/hadeth/hadeth_view.dart';
 import 'package:islami/quran/quran_view.dart';
 import 'package:islami/sebha/sebha_view.dart';
 import '../core/widgets/app_navigation.dart';
-import 'package:islami/core/constants/app_images.dart';
-import 'package:islami/core/widgets/app_header.dart';
+//import 'package:islami/core/constants/app_images.dart';
+//import 'package:islami/core/widgets/app_header.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -16,11 +17,11 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
 
-  static final List<Widget> _screens = [
+  final List<Widget> _screens = [
     QuranView(),
     HadethView(),
-    const SebhaView(),
-    const Center(child: Text('Radio')),
+    SebhaView(),
+    RadioView(),
     const Center(child: Text('Time')),
   ];
 
@@ -32,27 +33,19 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: SafeArea(
-        bottom: false,
-        child: Container(
-          decoration: BoxDecoration(
-            image: DecorationImage(
-              image: AssetImage(AppImages.background),
-              fit: BoxFit.cover,
+    return Material(
+      // 👈 الحل هنا
+      child: SafeArea(
+        child: Column(
+          children: [
+            Expanded(child: _screens[_selectedIndex]),
+
+            AppNavigationBar(
+              selectedIndex: _selectedIndex,
+              onItemTapped: _onItemTapped,
             ),
-          ),
-          child: Column(
-            children: [
-              const AppHeader(),
-              Expanded(child: _screens[_selectedIndex]),
-            ],
-          ),
+          ],
         ),
-      ),
-      bottomNavigationBar: AppNavigationBar(
-        selectedIndex: _selectedIndex,
-        onItemTapped: _onItemTapped,
       ),
     );
   }
