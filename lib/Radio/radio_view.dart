@@ -1,9 +1,9 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 import 'package:audioplayers/audioplayers.dart';
 import 'package:islami/core/constants/app_images.dart';
 import 'package:islami/core/widgets/app_header.dart';
+import 'services/radio_service.dart';
+import 'widgets/radio_card.dart';
 
 class RadioView extends StatefulWidget {
   const RadioView({super.key});
@@ -15,55 +15,84 @@ class RadioView extends StatefulWidget {
 class _RadioViewState extends State<RadioView> {
   int selectedIndex = 0;
 
-  /// API
   List radios = [];
   bool isLoading = true;
 
-  /// Audio
   final player = AudioPlayer();
   int currentIndex = -1;
 
-  /// 🔊 حالة الصوت (GLOBAL)
   bool isMuted = false;
+
+  /// reciter playlist
+  List<String> suras = List.generate(
+    114,
+    (i) => "${(i + 1).toString().padLeft(3, '0')}.mp3",
+  );
+
+  int currentSuraIndex = 0;
 
   @override
   void initState() {
     super.initState();
-    fetchRadios();
+    _loadRadios();
   }
 
-  Future<void> fetchRadios() async {
-    final response = await http.get(
-      Uri.parse("https://mp3quran.net/api/v3/radios?language=en"),
-    );
-
-    final data = jsonDecode(response.body);
-
+  Future<void> _loadRadios() async {
+    setState(() => isLoading = true);
+    final data = await RadioService.fetchRadios();
     setState(() {
-      radios = data["radios"];
+      radios = data;
       isLoading = false;
     });
+  }
+
+  Future<void> _loadReciters() async {
+    setState(() => isLoading = true);
+    final data = await RadioService.fetchReciters();
+    setState(() {
+      radios = data;
+      isLoading = false;
+    });
+  }
+
+  /// Play reciter (all suras)
+  Future<void> playReciter(String server, int index) async {
+    setState(() {
+      currentIndex = index;
+      currentSuraIndex = 0;
+    });
+
+    await player.stop();
+    await player.setVolume(1);
+
+    playNextSura(server);
+  }
+
+  void playNextSura(String server) async {
+    if (currentSuraIndex >= suras.length) return;
+
+    String url = server + suras[currentSuraIndex];
+
+    await player.play(UrlSource(url));
+
+    player.onPlayerComplete.listen((event) {
+      currentSuraIndex++;
+      playNextSura(server);
+    });
+
+    setState(() {});
   }
 
   @override
   Widget build(BuildContext context) {
     return Stack(
       children: [
+        /// background
         Positioned.fill(
           child: Image.asset(AppImages.radioimg, fit: BoxFit.cover),
         ),
 
-        Positioned.fill(
-          child: Container(
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [Color.fromRGBO(32, 32, 32, 0.7), Color(0xFF202020)],
-              ),
-            ),
-          ),
-        ),
+        Positioned.fill(child: Container(color: const Color(0xCC202020))),
 
         SafeArea(
           child: Column(
@@ -71,7 +100,7 @@ class _RadioViewState extends State<RadioView> {
               const AppHeader(),
               const SizedBox(height: 20),
 
-              /// Toggle
+              /// toggle
               Center(
                 child: Container(
                   width: 390,
@@ -103,6 +132,7 @@ class _RadioViewState extends State<RadioView> {
                                 setState(() {
                                   selectedIndex = 0;
                                 });
+                                _loadRadios();
                               },
                               child: const Center(child: Text("Radio")),
                             ),
@@ -113,6 +143,7 @@ class _RadioViewState extends State<RadioView> {
                                 setState(() {
                                   selectedIndex = 1;
                                 });
+                                _loadReciters();
                               },
                               child: const Center(child: Text("Reciters")),
                             ),
@@ -126,7 +157,7 @@ class _RadioViewState extends State<RadioView> {
 
               const SizedBox(height: 20),
 
-              /// List
+              /// list
               Expanded(
                 child:
                     isLoading
@@ -134,12 +165,39 @@ class _RadioViewState extends State<RadioView> {
                         : ListView.builder(
                           itemCount: radios.length,
                           itemBuilder: (context, index) {
-                            final radio = radios[index];
+                            final item = radios[index];
 
-                            return buildRadioCard(
-                              name: radio["name"],
-                              url: radio["url"],
+                            return RadioCard(
+                              item: item,
                               index: index,
+                              isPlaying: currentIndex == index,
+                              selectedIndex: selectedIndex,
+                              isMuted: isMuted,
+                              player: player,
+                              onPlayRadio: (url) async {
+                                await player.play(UrlSource(url));
+                                setState(() => currentIndex = index);
+                              },
+                              onStopRadio: () async {
+                                await player.stop();
+                                setState(() => currentIndex = -1);
+                              },
+                              onPlayReciter: () {
+                                final server =
+                                    (item["moshaf"] != null &&
+                                            item["moshaf"].isNotEmpty)
+                                        ? item["moshaf"][0]["server"]
+                                        : "";
+                                playReciter(server, index);
+                              },
+                              onToggleMute: () async {
+                                if (isMuted) {
+                                  await player.setVolume(1);
+                                } else {
+                                  await player.setVolume(0);
+                                }
+                                setState(() => isMuted = !isMuted);
+                              },
                             );
                           },
                         ),
@@ -148,123 +206,6 @@ class _RadioViewState extends State<RadioView> {
           ),
         ),
       ],
-    );
-  }
-
-  /// CARD
-  Widget buildRadioCard({
-    required String name,
-    required String url,
-    required int index,
-  }) {
-    bool isPlaying = currentIndex == index;
-
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-      width: 390,
-      height: 133,
-      decoration: BoxDecoration(
-        color: const Color(0xFFE2BE7F),
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Stack(
-        children: [
-          /// BACKGROUND
-          Positioned(
-            bottom: 0,
-            left: 0,
-            right: 0,
-            child: ClipRRect(
-              borderRadius: const BorderRadius.only(
-                bottomLeft: Radius.circular(20),
-                bottomRight: Radius.circular(20),
-              ),
-              child: Image.asset(
-                'assets/images/radioback.png',
-                fit: BoxFit.cover,
-                height: 90,
-              ),
-            ),
-          ),
-
-          /// CONTENT
-          Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  name.replaceFirst(RegExp('^Radio\\s+'), ''),
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    color: Colors.black,
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-
-                const SizedBox(height: 10),
-
-                /// ICONS
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    /// PLAY
-                    IconButton(
-                      icon: Icon(
-                        isPlaying ? Icons.pause : Icons.play_arrow,
-                        size: 40,
-                        color: Colors.black,
-                      ),
-                      onPressed: () async {
-                        if (isPlaying) {
-                          await player.stop();
-                          setState(() {
-                            currentIndex = -1;
-                            isMuted = false;
-                          });
-                        } else {
-                          await player.stop();
-                          await player.setVolume(1);
-                          await player.play(UrlSource(url));
-
-                          setState(() {
-                            currentIndex = index;
-                            isMuted = false;
-                          });
-                        }
-                      },
-                    ),
-
-                    /// SOUND - Always visible
-                    IconButton(
-                      icon: Icon(
-                        isMuted ? Icons.volume_off : Icons.volume_up,
-                        size: 28,
-                        color: Colors.black,
-                      ),
-                      onPressed: () async {
-                        if (!isPlaying) return;
-
-                        if (isMuted) {
-                          await player.setVolume(1);
-                          setState(() {
-                            isMuted = false;
-                          });
-                        } else {
-                          await player.setVolume(0);
-                          setState(() {
-                            isMuted = true;
-                          });
-                        }
-                      },
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
     );
   }
 }
