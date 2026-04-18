@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:islami/core/constants/app_images.dart';
 import 'package:islami/intro/intro_screen.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -13,10 +14,10 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    Timer(const Duration(seconds: 3), () {
+    Timer(const Duration(seconds: 2), () {
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (_) =>  const IntroScreen()),
+        MaterialPageRoute(builder: (_) => const IntroScreen()),
       );
     });
   }
@@ -24,18 +25,13 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SizedBox(
-        width: double.infinity,
-        height: double.infinity,
-        child: Image.asset(
-            "assets/images/Splash Screen.png",
-          fit: BoxFit.cover,
+      body: SafeArea(
+        child: SizedBox(
+          width: double.infinity,
+          height: double.infinity,
+          child: Image.asset(AppImages.splashScreen, fit: BoxFit.cover),
         ),
-
       ),
-
     );
-
   }
-
 }
