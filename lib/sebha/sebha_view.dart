@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:islami/core/constants/app_colors.dart';
 import 'package:islami/core/constants/app_images.dart';
 import 'package:islami/core/widgets/app_header.dart';
 
@@ -9,7 +10,8 @@ class SebhaView extends StatefulWidget {
   State<SebhaView> createState() => _SebhaViewState();
 }
 
-class _SebhaViewState extends State<SebhaView> {
+class _SebhaViewState extends State<SebhaView> with TickerProviderStateMixin {
+  late AnimationController _rotationController;
   final List<Map<String, dynamic>> azkar = [
     {"text": "سبحان الله", "count": 33},
     {"text": "الحمد لله", "count": 33},
@@ -22,7 +24,23 @@ class _SebhaViewState extends State<SebhaView> {
   String get currentZekr => azkar[index]["text"];
   int get maxCount => azkar[index]["count"];
 
+  @override
+  void initState() {
+    super.initState();
+    _rotationController = AnimationController(
+      duration: const Duration(milliseconds: 800),
+      vsync: this,
+    );
+  }
+
+  @override
+  void dispose() {
+    _rotationController.dispose();
+    super.dispose();
+  }
+
   void increment() {
+    _rotationController.forward(from: 0.0);
     setState(() {
       count++;
 
@@ -38,6 +56,7 @@ class _SebhaViewState extends State<SebhaView> {
   }
 
   void reset() {
+    _rotationController.reset();
     setState(() {
       count = 0;
       index = 0;
@@ -49,19 +68,21 @@ class _SebhaViewState extends State<SebhaView> {
     return Stack(
       children: [
         Positioned.fill(
-          child: Image.asset(AppImages.sebhabackg, fit: BoxFit.cover,
+          child: Image.asset(
+            AppImages.sebhabackg,
+            fit: BoxFit.cover,
             filterQuality: FilterQuality.low,
           ),
         ),
         Positioned.fill(
           child: Container(
-            decoration: const BoxDecoration(
+            decoration: BoxDecoration(
               gradient: LinearGradient(
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
                 colors: [
-                  Color.fromRGBO(32, 32, 32, 0.7), // فوق خفيف
-                  Color(0xFF202020), // تحت غامق
+                  AppColors.darkGradientStart,
+                  AppColors.darkGradientEnd,
                 ],
               ),
             ),
@@ -94,23 +115,30 @@ class _SebhaViewState extends State<SebhaView> {
                   child: GestureDetector(
                     onTap: increment,
                     child: SizedBox(
-
-
                       child: Stack(
                         alignment: Alignment.center,
 
                         children: [
-                          /// 👇 جسم السبحة
-                          Image.asset(
-                            AppImages.SebhaBody,
-                            width: 340,
-                            height: 381,
-                            fit: BoxFit.contain,
+                          /// 👇 جسم السبحة مع الدوران
+                          RotationTransition(
+                            turns: Tween(begin: 0.2, end: 0.5).animate(
+                              CurvedAnimation(
+                                parent: _rotationController,
+                                curve: Curves.easeInOut,
+                              ),
+                            ),
+
+                            child: Image.asset(
+                              AppImages.SebhaBody,
+                              width: 340,
+                              height: 381,
+                              fit: BoxFit.contain,
+                            ),
                           ),
 
                           /// 👇 رأس السبحة
                           Positioned(
-                            top: 0,
+                            top: -10,
                             child: Image.asset(AppImages.SebhaHead, width: 100),
                           ),
 
@@ -150,10 +178,10 @@ class _SebhaViewState extends State<SebhaView> {
                     ),
                   ),
                 ),
-              ),  
+              ),
 
               //const SizedBox(height: 40),
-             // const SizedBox(height: 24),
+              // const SizedBox(height: 24),
             ],
           ),
         ),

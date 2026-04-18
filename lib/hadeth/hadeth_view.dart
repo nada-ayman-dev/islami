@@ -1,42 +1,38 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart' show rootBundle;
 import 'package:islami/core/constants/app_colors.dart';
 import 'package:islami/core/constants/app_images.dart';
+import 'package:islami/core/utils/cache_manager.dart';
 import 'hadeth_details.dart';
-import 'package:islami/core/widgets/app_header.dart';
-
-Future<String> loadHadethFile(String hadethNumber) async {
-  try {
-    return await rootBundle.loadString('assets/Hadeeth/h$hadethNumber.txt');
-  } catch (e) {
-    return "خطأ: لا يمكن تحميل الحديث.";
-  }
-}
 
 class HadethView extends StatefulWidget {
   const HadethView({super.key});
 
   @override
-  State<HadethView> createState() => _HadethListViewState();
+  State<HadethView> createState() => _HadethViewState();
 }
 
-class _HadethListViewState extends State<HadethView> {
-  final PageController controller = PageController(viewportFraction: 0.75);
-  double currentPage = 0;
+class _HadethViewState extends State<HadethView> {
+  late PageController controller;
+  late ValueNotifier<double> currentPageNotifier;
+  final cacheManager = CacheManager();
 
   @override
   void initState() {
     super.initState();
-    controller.addListener(() {
-      setState(() {
-        currentPage = controller.page ?? 0;
-      });
-    });
+    currentPageNotifier = ValueNotifier<double>(0.0);
+    controller = PageController(viewportFraction: 0.75);
+    controller.addListener(_onPageChanged);
+  }
+
+  void _onPageChanged() {
+    currentPageNotifier.value = controller.page ?? 0.0;
   }
 
   @override
   void dispose() {
+    controller.removeListener(_onPageChanged);
     controller.dispose();
+    currentPageNotifier.dispose();
     super.dispose();
   }
 
@@ -44,62 +40,70 @@ class _HadethListViewState extends State<HadethView> {
   Widget build(BuildContext context) {
     return Stack(
       children: [
-        /// 👇 الخلفية
+        /// Background image
         Positioned.fill(
-          child: Image.asset(AppImages.hadethbackground, fit: BoxFit.cover),
+          child: Image.asset(
+            AppImages.hadethbackground,
+            fit: BoxFit.cover,
+            cacheWidth: 1080,
+            cacheHeight: 2340,
+          ),
         ),
 
-        /// 👇 gradient
+        /// Gradient overlay
         Positioned.fill(
           child: Container(
-            decoration: const BoxDecoration(
+            decoration: BoxDecoration(
               gradient: LinearGradient(
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
-                colors: [Color.fromRGBO(32, 32, 32, 0.7), Color(0xFF202020)],
+                colors: [
+                  AppColors.darkGradientStart,
+                  AppColors.darkGradientEnd,
+                ],
               ),
             ),
           ),
         ),
 
-        /// 👇 المحتوى كله
-        SafeArea(
-          child: Column(
-            children: [
-              const AppHeader(),
-              const SizedBox(height: 10),
-
-              /// 👇 الكروت
-              Expanded(
-                child: PageView.builder(
-                  controller: controller,
-                  itemCount: 50,
-                  itemBuilder: (context, index) {
-                    double scale = (1 - (currentPage - index).abs()).clamp(
-                      0.85,
-                      1.0,
-                    );
-
-                    return Transform.scale(
-                      scale: scale,
-                      child: HadethCard(hadethNumber: (index + 1).toString()),
-                    );
-                  },
-                ),
-              ),
-            ],
-          ),
+        /// PageView
+        PageView.builder(
+          controller: controller,
+          itemCount: 50,
+          itemBuilder: (context, index) {
+            return ValueListenableBuilder<double>(
+              valueListenable: currentPageNotifier,
+              builder: (context, currentPage, _) {
+                double scale = (1 - (currentPage - index).abs()).clamp(
+                  0.85,
+                  1.0,
+                );
+                return Transform.scale(
+                  scale: scale,
+                  child: HadethCard(
+                    hadethNumber: (index + 1).toString(),
+                    cacheManager: cacheManager,
+                  ),
+                );
+              },
+            );
+          },
         ),
       ],
     );
   }
 }
 
-/// 👇 كارت الحديث
+/// Optimized HadethCard
 class HadethCard extends StatelessWidget {
   final String hadethNumber;
+  final CacheManager cacheManager;
 
-  const HadethCard({super.key, required this.hadethNumber});
+  const HadethCard({
+    super.key,
+    required this.hadethNumber,
+    required this.cacheManager,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -112,28 +116,43 @@ class HadethCard extends StatelessWidget {
           ),
         );
       },
-
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 20),
-
-        child: Container(
-          decoration: BoxDecoration(
-            color: AppColors.textPrimary,
-            borderRadius: BorderRadius.circular(20),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.3),
-                blurRadius: 10,
-                offset: const Offset(0, 5),
-              ),
-            ],
-          ),
-
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(20),
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+        decoration: BoxDecoration(
+          color: AppColors.textPrimary,
+          border: Border.all(color: AppColors.textPrimary, width: 3),
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.3),
+              blurRadius: 10,
+              offset: const Offset(0, 5),
+            ),
+          ],
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(20),
+          child: RepaintBoundary(
             child: Stack(
               children: [
-                /// 👈 الزوايا
+                /// Background image
+                Positioned.fill(
+                  child: Center(
+                    child: Opacity(
+                      opacity: 0.2,
+                      child: Image.asset(
+                        AppImages.hadethback,
+                        width: 313,
+                        height: 428,
+                        fit: BoxFit.contain,
+                        cacheWidth: 313,
+                        cacheHeight: 428,
+                      ),
+                    ),
+                  ),
+                ),
+
+                /// Corner decorations
                 Positioned(
                   top: 16,
                   left: 16,
@@ -142,6 +161,8 @@ class HadethCard extends StatelessWidget {
                     width: 80,
                     height: 80,
                     color: Colors.black,
+                    cacheWidth: 80,
+                    cacheHeight: 80,
                   ),
                 ),
 
@@ -153,20 +174,30 @@ class HadethCard extends StatelessWidget {
                     width: 80,
                     height: 80,
                     color: Colors.black,
+                    cacheWidth: 80,
+                    cacheHeight: 80,
                   ),
                 ),
 
-                /// 👇 النص
+                /// Content
                 Positioned(
                   top: 100,
                   left: 0,
                   right: 0,
                   bottom: 120,
                   child: FutureBuilder<String>(
-                    future: loadHadethFile(hadethNumber),
+                    future: cacheManager.loadFile(
+                      'assets/Hadeeth/h$hadethNumber.txt',
+                    ),
                     builder: (context, snapshot) {
                       if (snapshot.connectionState != ConnectionState.done) {
-                        return const Center(child: CircularProgressIndicator());
+                        return const Center(
+                          child: SizedBox(
+                            width: 30,
+                            height: 30,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          ),
+                        );
                       }
 
                       if (snapshot.hasError ||
@@ -193,6 +224,7 @@ class HadethCard extends StatelessWidget {
                               fontWeight: FontWeight.w700,
                               fontSize: 16,
                               height: 1.2,
+                              letterSpacing: 0,
                             ),
                           ),
                         ),
@@ -201,7 +233,7 @@ class HadethCard extends StatelessWidget {
                   ),
                 ),
 
-                /// 👇 الزخرفة تحت
+                /// Bottom decoration
                 Positioned(
                   bottom: 0,
                   left: 0,

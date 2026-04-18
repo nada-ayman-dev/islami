@@ -17,6 +17,9 @@ class QuranView extends StatefulWidget {
 class _QuranViewState extends State<QuranView> {
   List<Sura> suras = [];
   List<Sura> filteredSuras = [];
+  List<Sura> recentSuras = [];
+
+  String searchText = '';
 
   @override
   void initState() {
@@ -34,6 +37,7 @@ class _QuranViewState extends State<QuranView> {
 
   void _filterSuras(String text) {
     setState(() {
+      searchText = text;
       filteredSuras =
           suras.where((sura) {
             final query = text.toLowerCase();
@@ -43,229 +47,257 @@ class _QuranViewState extends State<QuranView> {
     });
   }
 
+  void _addToRecent(Sura sura) {
+    setState(() {
+      recentSuras.removeWhere((item) => item.number == sura.number);
+      recentSuras.insert(0, sura);
+
+      if (recentSuras.length > 4) {
+        recentSuras = recentSuras.sublist(0, 4);
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     if (suras.isEmpty) {
       return const Center(child: CircularProgressIndicator());
     }
 
-    final recentSuras = suras.take(4).toList();
-
     return Container(
-    
       width: double.infinity,
       height: double.infinity,
       decoration: BoxDecoration(
         image: DecorationImage(
-          image: AssetImage(AppImages.background), // 👈 الخلفية
+          image: AssetImage(AppImages.background),
           fit: BoxFit.cover,
         ),
-
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const AppHeader(),
-          const SizedBox(height: 10),
-          // Search Field
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: TextField(
-              onChanged: _filterSuras,
-              style: const TextStyle(color: Colors.white),
-              decoration: InputDecoration(
-                hintText: "Search",
-                hintStyle: TextStyle(color: AppColors.textPrimary),
-                prefixIcon: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: SvgPicture.asset(
-                    AppIcons.home,
-                    height: 20,
-                    width: 20,
-                    color: AppColors.textPrimary,
-                  ),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: AppColors.textPrimary),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(
-                    color: AppColors.textPrimary,
-                    width: 2,
-                  ),
-                ),
-              ),
-            ),
-          ),
 
-          // Most Recently
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8),
-            child: Text(
-              "Most Recently",
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
+          Expanded(
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(height: 10),
 
-          const SizedBox(height: 8),
-
-          SizedBox(
-            height: 150,
-            child: ListView.builder(
-              scrollDirection: Axis.horizontal,
-              itemCount: recentSuras.length,
-              itemBuilder: (context, index) {
-                final sura = recentSuras[index];
-                return Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8),
-                  child: Container(
-                    width: 250,
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: AppColors.textPrimary,
-                      borderRadius: BorderRadius.circular(12),
+                  /// 🔍 SEARCH
+                  Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: TextField(
+                      onChanged: _filterSuras,
+                      style: const TextStyle(color: Colors.white),
+                      decoration: InputDecoration(
+                        hintText: "Search",
+                        hintStyle: TextStyle(color: AppColors.textPrimary),
+                        prefixIcon: Padding(
+                          padding: const EdgeInsets.all(8),
+                          child: SvgPicture.asset(
+                            AppIcons.home,
+                            height: 20,
+                            width: 20,
+                            color: AppColors.textPrimary,
+                          ),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(color: AppColors.textPrimary),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(
+                            color: AppColors.textPrimary,
+                            width: 2,
+                          ),
+                        ),
+                      ),
                     ),
-                    child: Row(
-                      children: [
-                        Expanded(
+                  ),
+
+                  /// ⭐ MOST RECENTLY
+                  if (searchText.isEmpty && recentSuras.isNotEmpty) ...[
+                    const Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 8),
+                      child: Text(
+                        "Most Recently",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(height: 8),
+
+                    SizedBox(
+                      height: 150,
+                      child: ListView.builder(
+                        scrollDirection: Axis.horizontal,
+                        itemCount: recentSuras.length,
+                        itemBuilder: (context, index) {
+                          final sura = recentSuras[index];
+
+                          return Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 8),
+                            child: Container(
+                              width: 250,
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                color: AppColors.textPrimary,
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Row(
+                                children: [
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        Text(
+                                          sura.english,
+                                          style: TextStyle(
+                                            color: AppColors.background,
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                        Text(
+                                          sura.arabic,
+                                          style: TextStyle(
+                                            color: AppColors.background,
+                                            fontSize: 16,
+                                          ),
+                                        ),
+                                        Text(
+                                          "${sura.ayaCount} Verses",
+                                          style: TextStyle(
+                                            color: AppColors.background,
+                                            fontSize: 14,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Image.asset(
+                                    AppImages.recentlyimage,
+                                    width: 80,
+                                    height: 80,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+
+                    const SizedBox(height: 10),
+                  ],
+
+                  /// 📜 LIST TITLE
+                  const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 8),
+                    child: Text(
+                      "Suras List",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+
+                  /// 📜 SURAS LIST
+                  ListView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: filteredSuras.length,
+                    itemBuilder: (context, index) {
+                      final sura = filteredSuras[index];
+
+                      return Padding(
+                        padding: const EdgeInsets.all(8),
+                        child: InkWell(
+                          onTap: () async {
+                            await Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => SuraDetails(sura: sura),
+                              ),
+                            );
+
+                            _addToRecent(sura);
+                          },
                           child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Text(
-                                sura.english,
-                                style: TextStyle(
-                                  color: AppColors.background,
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                ),
+                              Row(
+                                children: [
+                                  Stack(
+                                    alignment: Alignment.center,
+                                    children: [
+                                      SvgPicture.asset(
+                                        AppIcons.sura_number,
+                                        height: 52,
+                                        width: 52,
+                                        color: Colors.white,
+                                      ),
+                                      Text(
+                                        sura.number,
+                                        style: const TextStyle(
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        sura.english,
+                                        style: const TextStyle(
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 20,
+                                        ),
+                                      ),
+                                      Text(
+                                        "${sura.ayaCount} Verses",
+                                        style: const TextStyle(
+                                          color: Colors.white70,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const Spacer(),
+                                  Text(
+                                    sura.arabic,
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ],
                               ),
-                              Text(
-                                sura.arabic,
-                                style: TextStyle(
-                                  color: AppColors.background,
-                                  fontSize: 16,
-                                ),
-                              ),
-                              Text(
-                                "${sura.ayaCount} Verses",
-                                style: TextStyle(
-                                  color: AppColors.background,
-                                  fontSize: 14,
-                                ),
-                              ),
+                              const Divider(color: Colors.white38),
                             ],
                           ),
                         ),
-                        const SizedBox(width: 12),
-                        Image.asset(
-                          AppImages.recentlyimage,
-                          width: 80,
-                          height: 80,
-                          fit: BoxFit.cover,
-                        ),
-                      ],
-                    ),
-                  ),
-                );
-              },
-            ),
-          ),
-
-          const SizedBox(height: 8),
-
-          // Suras List
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8),
-            child: Text(
-              "Suras List",
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-
-          Expanded(
-            child: ListView.builder(
-              itemCount: filteredSuras.length,
-              itemBuilder: (context, index) {
-                final sura = filteredSuras[index];
-
-                return Padding(
-                  padding: const EdgeInsets.all(8),
-                  child: InkWell(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => SuraDetails(sura: sura),
-                        ),
                       );
                     },
-                    child: Column(
-                      children: [
-                        Row(
-                          children: [
-                            Stack(
-                              alignment: Alignment.center,
-                              children: [
-                                SvgPicture.asset(
-                                  AppIcons.sura_number,
-                                  height: 52,
-                                  width: 52,
-                                  color: Colors.white,
-                                ),
-                                Text(
-                                  sura.number,
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(width: 12),
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  sura.english,
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 20,
-                                  ),
-                                ),
-                                Text(
-                                  "${sura.ayaCount} Verses",
-                                  style: const TextStyle(color: Colors.white70),
-                                ),
-                              ],
-                            ),
-                            const Spacer(),
-                            Text(
-                              sura.arabic,
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
-                        ),
-                        const Divider(color: Colors.white38),
-                      ],
-                    ),
                   ),
-                );
-              },
+                ],
+              ),
             ),
           ),
         ],

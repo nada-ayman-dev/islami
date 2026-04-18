@@ -3,6 +3,7 @@ import 'package:islami/Radio/radio_view.dart';
 import 'package:islami/hadeth/hadeth_view.dart';
 import 'package:islami/quran/quran_view.dart';
 import 'package:islami/sebha/sebha_view.dart';
+import 'package:islami/time/time_view.dart';
 import '../core/widgets/app_navigation.dart';
 //import 'package:islami/core/constants/app_images.dart';
 //import 'package:islami/core/widgets/app_header.dart';
@@ -22,7 +23,7 @@ class _HomeScreenState extends State<HomeScreen> {
     HadethView(),
     SebhaView(),
     RadioView(),
-    const Center(child: Text('Time')),
+    const TimeView(),
   ];
 
   void _onItemTapped(int index) {

@@ -48,6 +48,7 @@ class SuraDetails extends StatelessWidget {
                       fontWeight: FontWeight.bold,
                       color: AppColors.textPrimary,
                       fontFamily: 'Janna LT',
+                      fontSize: 24,
                     ),
                   ),
                 ),
@@ -124,24 +125,46 @@ class SuraDetails extends StatelessWidget {
                                 .where((line) => line.trim().isNotEmpty)
                                 .toList();
 
-                        final formattedText = suraLines
-                            .asMap()
-                            .entries
-                            .map((entry) => '${entry.value} [${entry.key + 1}]')
-                            .join(' ');
-
                         return SingleChildScrollView(
                           physics: const BouncingScrollPhysics(),
-                          child: Text(
-                            formattedText,
+                          child: RichText(
                             textAlign: TextAlign.justify,
                             textDirection: TextDirection.rtl,
-                            style: const TextStyle(
-                              fontSize: 20,
-                              color: AppColors.textPrimary,
-                              height: 2.0,
-                              fontFamily: 'Janna LT',
-                              fontWeight: FontWeight.w700,
+                            text: TextSpan(
+                              children:
+                                  suraLines.asMap().entries.map((entry) {
+                                    final verseNumber = entry.key + 1;
+                                    final versText = entry.value;
+                                    return TextSpan(
+                                      children: [
+                                        TextSpan(
+                                          text: versText,
+                                          style: const TextStyle(
+                                            fontSize: 20,
+                                            color: AppColors.textPrimary,
+                                            height: 2.0,
+                                            fontFamily: 'Janna LT',
+                                            fontWeight: FontWeight.w700,
+                                          ),
+                                        ),
+                                        TextSpan(
+                                          text: ' [$verseNumber]',
+                                          style: const TextStyle(
+                                            fontSize: 20,
+                                            color: AppColors.textPrimary,
+                                            height: 2.0,
+                                            fontFamily: 'Janna LT',
+                                            fontWeight: FontWeight.w700,
+                                            decoration:
+                                                TextDecoration.underline,
+                                            decorationColor: Color(0xFFE2BE7F),
+                                            decorationThickness: 2,
+                                          ),
+                                        ),
+                                        const TextSpan(text: ' '),
+                                      ],
+                                    );
+                                  }).toList(),
                             ),
                           ),
                         );

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:audioplayers/audioplayers.dart';
+import 'package:islami/core/constants/app_colors.dart';
 import 'package:islami/core/constants/app_images.dart';
 import 'package:islami/core/widgets/app_header.dart';
 import 'services/radio_service.dart';
@@ -106,7 +107,7 @@ class _RadioViewState extends State<RadioView> {
                   width: 390,
                   height: 40,
                   decoration: BoxDecoration(
-                    color: const Color(0xB2202020),
+                    color: AppColors.darkBackgroundWithOpacity,
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Stack(
@@ -118,7 +119,7 @@ class _RadioViewState extends State<RadioView> {
                           width: 195,
                           height: 40,
                           decoration: BoxDecoration(
-                            color: const Color(0xFFE2BE7F),
+                            color: AppColors.gold,
                             borderRadius: BorderRadius.circular(12),
                           ),
                         ),
@@ -134,7 +135,18 @@ class _RadioViewState extends State<RadioView> {
                                 });
                                 _loadRadios();
                               },
-                              child: const Center(child: Text("Radio")),
+                              child: Center(
+                                child: Text(
+                                  "Radio",
+                                  style: TextStyle(
+                                    color:
+                                        selectedIndex == 0
+                                            ? Colors.black
+                                            : Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
                             ),
                           ),
                           Expanded(
@@ -145,7 +157,18 @@ class _RadioViewState extends State<RadioView> {
                                 });
                                 _loadReciters();
                               },
-                              child: const Center(child: Text("Reciters")),
+                              child: Center(
+                                child: Text(
+                                  "Reciters",
+                                  style: TextStyle(
+                                    color:
+                                        selectedIndex == 1
+                                            ? Colors.black
+                                            : Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
                             ),
                           ),
                         ],
